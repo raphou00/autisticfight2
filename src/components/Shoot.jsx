@@ -1,24 +1,30 @@
 import * as THREE from "three";
-import { RapierRigidBody, RigidBody } from "@react-three/rapier";
+import { RigidBody } from "@react-three/rapier";
 import { useRef, useMemo, useState, useEffect } from "react";
 import { Trail } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
+import { useGame } from "ecctrl";
 
 const Shoot = ({ player }) => {
-    const { camera } = useThree();
+    const { action1 } = useGame();
     const [cubeMesh, setCubeMesh] = useState([]);
     const cubeRef = useRef();
 
     const position = useMemo(() => new THREE.Vector3(), []);
     const direction = useMemo(() => new THREE.Vector3(), []);
 
-    const clickToCreateBox = () => {        
+    const audioLoader = new THREE.AudioLoader();
+    const sound = new THREE.PositionalAudio(new THREE.AudioListener());
+    audioLoader.load("/audios/shoot.mp3", (buffer) => {
+        sound.setBuffer(buffer);
+    });
+
+    const shoot = () => {        
         if (document.pointerLockElement) {
-            const camPos = camera.getWorldPosition(position);
-            const camQuat = camera.getWorldQuaternion(new THREE.Quaternion());
+            const camPos = player.current.getWorldPosition(position);
+            const camQuat = player.current.getWorldQuaternion(new THREE.Quaternion());
             
             const d = 2;
-            const v = new THREE.Vector3(0, 0, 1);
+            const v = new THREE.Vector3(0.1, 0, 1);
             v.applyQuaternion(camQuat);
             v.multiplyScalar(d);
             position.copy(camPos).add(v);
@@ -35,11 +41,15 @@ const Shoot = ({ player }) => {
                 </mesh>
             );
             setCubeMesh((prevMeshes) => [...prevMeshes, newMesh]);
+
+            action1();
+            if (sound.isPlaying) sound.stop();
+            sound.play();
         }
     };
 
     useEffect(() => {
-        camera.getWorldDirection(direction);
+        player.current.getWorldDirection(direction);
         if (cubeMesh.length > 0) {
             cubeRef.current?.setLinvel(
                 new THREE.Vector3(
@@ -53,10 +63,10 @@ const Shoot = ({ player }) => {
     }, [cubeMesh]);
 
     useEffect(() => {
-        window.addEventListener("click", () => clickToCreateBox());
+        window.addEventListener("click", () => shoot());
 
         return () => {
-            window.removeEventListener("click", () => clickToCreateBox());
+            window.removeEventListener("click", () => shoot());
         };
     }, []);
 

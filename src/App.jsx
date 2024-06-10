@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import { useState, useEffect, useRef, useMemo, Suspense } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Gltf, Sky, KeyboardControls, Stars } from "@react-three/drei";
+import { useEffect, useRef, Suspense } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Gltf, Sky, KeyboardControls, Stars, useGLTF } from "@react-three/drei";
 import { EffectComposer, Bloom, SSAO } from "@react-three/postprocessing";
 import { Physics, RigidBody } from "@react-three/rapier";
-import Ecctrl from "ecctrl";
+import Ecctrl, { EcctrlAnimation } from "ecctrl";
 import Shoot from "./components/Shoot";
 
 const keyboardMap = [
@@ -17,15 +17,18 @@ const keyboardMap = [
 ];
 
 const animationSet = {
-    idle: "idle",
-    run: "run",
-    jump: "jump",
-    fall: "fall",
-    walk: "walk"
+    idle: "Draw",
+    walk: "Draw",
+    run: "Draw",
+    jump: "Draw",
+    jumpIdle: "Draw",
+    jumpLand: "Draw",
+    fall: "Draw",
+    action1: "Draw",
 };
 
 const Scene = () => {
-    const gunRef = useRef();
+    const player = useRef();
 
     const spotLight = new THREE.SpotLight(0xffffff, 3000);
     spotLight.position.set(-80, 60, -40);
@@ -39,7 +42,7 @@ const Scene = () => {
     spotLight.shadow.radius = 8;
 
     useFrame((state) => {
-        // gunRef.current.rotation.x = state.camera.getWorldDirection(new THREE.Vector3()).y * -1;
+        player.current.rotation.x = state.camera.getWorldDirection(new THREE.Vector3()).y * -1;
     });
 
     useEffect(() => {
@@ -48,17 +51,13 @@ const Scene = () => {
         audioLoader.load("/audios/music.mp3", (buffer) => {
             sound.setBuffer(buffer);
             sound.setLoop(true);
-            // sound.play();
+            sound.setVolume(0.5);
+            sound.play();
         });
     }, []);
 
     return (
         <Physics timeStep="vary">
-
-            <mesh>
-                <sphereGeometry args={[0.2]} />
-                <meshStandardMaterial color={0xaaaaff} />
-            </mesh>
 
             <fog attach="fog" args={["#555577", 150, 200]} />
             <primitive object={spotLight} />
@@ -96,23 +95,22 @@ const Scene = () => {
                     maxVelLimit={5}
                     sprintMult={1.5}
                     rotationSpeed={15}
-                    position={[0, 200, 0]}
+                    position={[0, 100, 0]}
                     animated
                 >
-                    {/* <EcctrlAnimation characterURL="/models/player/scene.gltf" animationSet={animationSet}> */}
-                        {/* <Gltf
-                            ref={gunRef}
+                    <EcctrlAnimation characterURL="/models/player/scene.gltf" animationSet={animationSet}>
+                        <Gltf
+                            ref={player}
                             src="/models/player/scene.gltf"
                             position={[-0.2, 0.5, 0]}
-                            // rotation={[0.5, 0, 0]}
                             receiveShadow
                             castShadow
-                        /> */}
-                    {/* </EcctrlAnimation> */}
+                        />
+                    </EcctrlAnimation>
                 </Ecctrl>
             </KeyboardControls>
 
-            <Shoot />
+            <Shoot player={player} />
 
         </Physics>
     );
@@ -122,7 +120,8 @@ const App = () => {
     return (
         <div className="h-screen">
 
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full w-px h-px border-2 bg-white z-50" />
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full w-px h-px border bg-white z-50" />
+
 
             <Canvas
                 gl={{ powerPreference: "high-performance" }}
