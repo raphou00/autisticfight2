@@ -143,3 +143,6 @@ const App = () => {
 }
 
 export default App;
+
+useGLTF.preload("/models/map/scene.gltf");
+useGLTF.preload("/models/player/scene.gltf");
