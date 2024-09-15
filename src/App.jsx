@@ -4,7 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Gltf, Sky, KeyboardControls, Stars, useGLTF } from "@react-three/drei";
 import { EffectComposer, Bloom, SSAO } from "@react-three/postprocessing";
 import { Physics, RigidBody } from "@react-three/rapier";
-import Ecctrl, { EcctrlAnimation } from "ecctrl";
+import Ecctrl, { EcctrlAnimation, EcctrlJoystick } from "ecctrl";
 import Shoot from "./components/Shoot";
 
 const keyboardMap = [
@@ -118,6 +118,7 @@ const App = () => {
 
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full w-px h-px border bg-white z-50" />
 
+            <EcctrlJoystick buttonNumber={2} />
 
             <Canvas
                 gl={{ powerPreference: "high-performance" }}
@@ -138,3 +139,9 @@ const App = () => {
 }
 
 export default App;
+<<<<<<< HEAD
+=======
+
+useGLTF.preload("/models/map/scene.gltf");
+useGLTF.preload("/models/player/scene.gltf");
+>>>>>>> 44ccd0d8795bc210bc97cb8f9c6cbf59ac0ee010
