@@ -46,14 +46,10 @@ const Scene = () => {
     });
 
     useEffect(() => {
-        const audioLoader = new THREE.AudioLoader();
-        const sound = new THREE.PositionalAudio(new THREE.AudioListener());
-        audioLoader.load("/audios/music.mp3", (buffer) => {
-            sound.setBuffer(buffer);
-            sound.setLoop(true);
-            sound.setVolume(0.5);
-            sound.play();
-        });
+        const audio = new Audio("/audios/music.mp3");
+        audio.volume = 0.5;
+        audio.loop = true;
+        audio.play();
     }, []);
 
     return (

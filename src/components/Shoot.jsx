@@ -12,12 +12,6 @@ const Shoot = ({ player }) => {
     const position = useMemo(() => new THREE.Vector3(), []);
     const direction = useMemo(() => new THREE.Vector3(), []);
 
-    const audioLoader = new THREE.AudioLoader();
-    const sound = new THREE.PositionalAudio(new THREE.AudioListener());
-    audioLoader.load("/audios/shoot.mp3", (buffer) => {
-        sound.setBuffer(buffer);
-    });
-
     const shoot = () => {        
         if (document.pointerLockElement) {
             const camPos = player.current.getWorldPosition(position);
@@ -43,8 +37,10 @@ const Shoot = ({ player }) => {
             setCubeMesh((prevMeshes) => [...prevMeshes, newMesh]);
 
             action1();
-            if (sound.isPlaying) sound.stop();
-            sound.play();
+            
+            const audio = new Audio("/audios/shoot.mp3");
+            audio.volume = 0.5;
+            audio.play();
         }
     };
 
