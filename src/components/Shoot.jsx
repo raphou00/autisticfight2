@@ -6,6 +6,7 @@ import { useGame } from "ecctrl";
 
 const Shoot = ({ player }) => {
     const { action1 } = useGame();
+    const [shooting, setShooting] = useState(false);
     const [cubeMesh, setCubeMesh] = useState([]);
     const cubeRef = useRef();
 
@@ -18,7 +19,7 @@ const Shoot = ({ player }) => {
             const camQuat = player.current.getWorldQuaternion(new THREE.Quaternion());
             
             const d = 2;
-            const v = new THREE.Vector3(0.1, 0, 1);
+            const v = new THREE.Vector3(0.1, 0, 0.1);
             v.applyQuaternion(camQuat);
             v.multiplyScalar(d);
             position.copy(camPos).add(v);
@@ -37,10 +38,6 @@ const Shoot = ({ player }) => {
             setCubeMesh((prevMeshes) => [...prevMeshes, newMesh]);
 
             action1();
-            
-            const audio = new Audio("/audios/shoot.mp3");
-            audio.volume = 0.5;
-            audio.play();
         }
     };
 
@@ -59,22 +56,49 @@ const Shoot = ({ player }) => {
     }, [cubeMesh]);
 
     useEffect(() => {
-        window.addEventListener("click", () => shoot());
+        console.log(shooting);
+        
+        const audio = new Audio("/audios/shoot.mp3");
+        audio.volume = 0.1;
+        audio.loop = true;
+
+        let interval
+
+        if (shooting) {
+            audio.play();
+
+            interval = setInterval(() => {
+                shoot();
+            }, 100);
+        } else {
+            audio.pause();
+        }
 
         return () => {
-            window.removeEventListener("click", () => shoot());
+            clearInterval(interval);
+            audio.pause();
+        }
+    }, [shooting]);
+
+    useEffect(() => {
+        window.addEventListener("mousedown", () => setShooting(true));
+        window.addEventListener("mouseup", () => setShooting(false));
+
+        return () => {
+            window.addEventListener("mousedown", () => setShooting(true));
+            window.addEventListener("mouseup", () => setShooting(false));
         };
     }, []);
 
     return (
         <>
-            {cubeMesh.map((item, i) => (
-                <RigidBody key={i} colliders="ball" gravityScale={0} ref={cubeRef}>
-                    <Trail width={1.6} color={0xaaaaff} attenuation={w => w - 0.2}>
+            <Trail width={1.6} color={0xaaaaff} attenuation={w => w - 0.2}>
+                {cubeMesh.map((item, i) => (
+                    <RigidBody key={i} colliders="ball" gravityScale={0} ref={cubeRef}>
                         {item}
-                    </Trail>
-                </RigidBody>
-            ))}
+                    </RigidBody>
+                ))}
+            </Trail>
         </>
     );
 }
